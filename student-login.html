@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>دخول الطالب — عالم إل</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="student-zone">
+  <img src="assets/joe-wave.png" alt="Joe" class="avatar-round">
+  <h1>يلا بينا!</h1>
+  <p class="subtitle">اختار اسمك وشكلك السري عشان تدخل 🎈</p>
+
+  <div class="card-student">
+    <input
+      type="text"
+      placeholder="اكتب اسمك هنا"
+      style="width:100%; font-family:var(--font-student); font-size:18px; padding:14px; border-radius:16px; border:2px solid var(--color-bg-student); background:var(--color-bg-student); text-align:center; margin-bottom:8px;"
+    >
+
+    <p style="margin: 16px 0 8px; font-weight:700;">اختار الرمز السري بتاعك:</p>
+    <div class="pin-grid">
+      <div class="pin-option">🦁</div>
+      <div class="pin-option">🌟</div>
+      <div class="pin-option">🚀</div>
+      <div class="pin-option">🐬</div>
+      <div class="pin-option">🎨</div>
+      <div class="pin-option">🍎</div>
+    </div>
+
+    <button class="btn-big gold" style="width:100%; margin-top:8px;">
+      يلا نلعب! 🎉
+    </button>
+  </div>
+
+  <a href="index.html" class="back-link" style="color: var(--color-brand-navy); opacity:0.5;">رجوع</a>
+
+  <!--
+    ملاحظة تنفيذية (المرحلة 1 فقط):
+    هذه الشاشة بصرية بالكامل حسب Phase 1 من Roadmap — بدون منطق دخول فعلي بعد.
+    منطق الدخول الحقيقي (التحقق من الاسم والرمز، وإصدار جلسة الطالب)
+    سيُبنى في مرحلة لاحقة مع Edge Function المخصصة (AI/System Architecture).
+  -->
+</body>
+</html>

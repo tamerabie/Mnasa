@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>دخول المدير — ELH-PRIMARY1</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="admin-zone">
+  <div class="card-admin">
+    <h1>لوحة تحكم المدير</h1>
+
+    <input type="email" id="email" class="input-admin" placeholder="البريد الإلكتروني">
+    <input type="password" id="password" class="input-admin" placeholder="كلمة المرور">
+    <button class="btn-admin" onclick="login()">دخول</button>
+    <p id="error" class="error-msg"></p>
+
+    <a href="index.html" class="back-link">رجوع</a>
+  </div>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+    // ⬇️ نفس القيمتين المستخدمتين في صفحة اختبار المرحلة 0
+    const SUPABASE_URL = "ضع-الـ-Project-URL-هنا";
+    const SUPABASE_ANON_KEY = "ضع-الـ-anon-public-key-هنا";
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    window.login = async function () {
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const errorEl = document.getElementById('error');
+      errorEl.style.display = 'none';
+
+      if (!email || !password) {
+        errorEl.textContent = 'من فضلك أدخل البريد وكلمة المرور';
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        errorEl.textContent = 'بيانات الدخول غير صحيحة';
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      // تحقق إضافي: هل هذا المستخدم موجود فعلاً بجدول admins؟
+      const { data: adminRow } = await supabase
+        .from('admins')
+        .select('id')
+        .eq('id', data.user.id)
+        .maybeSingle();
+
+      if (!adminRow) {
+        errorEl.textContent = 'هذا الحساب غير مسجّل كمدير';
+        errorEl.style.display = 'block';
+        await supabase.auth.signOut();
+        return;
+      }
+
+      location.href = 'admin-dashboard-placeholder.html';
+    };
+  </script>
+</body>
+</html>

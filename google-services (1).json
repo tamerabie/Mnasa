@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "901381733287",
+    "project_id": "elh-eng",
+    "storage_bucket": "elh-eng.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:901381733287:android:3dff08701f2a0c68181482",
+        "android_client_info": {
+          "package_name": "English.L.H"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB80yZ_DhsAy8d7UcFys4bvxge30pKvPfg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

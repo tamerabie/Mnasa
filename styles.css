@@ -1,0 +1,192 @@
+/* ============================================================
+   ELH-PRIMARY1 — Design Tokens (من المخرج 6: UI Design System)
+   ============================================================ */
+
+:root {
+  /* ألوان عالم الطالب */
+  --color-brand-navy: #1B2A4A;
+  --color-brand-teal: #17B6B0;
+  --color-accent-gold: #F5B301;
+  --color-accent-coral: #FF7A45;
+  --color-sky: #6FC6E8;
+  --color-meadow: #4CAF6D;
+  --color-bg-student: #FFF8ED;
+
+  /* ألوان لوحة المدير */
+  --color-slate: #33404F;
+  --color-bg-admin: #F5F7FA;
+
+  /* أشكال */
+  --radius-student-lg: 28px;
+  --radius-admin-sm: 8px;
+
+  /* خطوط */
+  --font-student: 'Baloo 2', 'Cairo', sans-serif;
+  --font-admin: 'Inter', 'IBM Plex Sans Arabic', sans-serif;
+
+  /* حركة */
+  --motion-fast: 250ms ease-in-out;
+  --motion-celebration: 2500ms ease-in-out;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+/* ============================================================
+   عالم الطالب — أزرار ضخمة، حواف دائرية، أسلوب لعب
+   ============================================================ */
+.student-zone {
+  background: var(--color-bg-student);
+  font-family: var(--font-student);
+  color: var(--color-brand-navy);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 24px;
+  text-align: center;
+}
+
+.student-zone h1 {
+  color: var(--color-brand-teal);
+  font-size: 28px;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.student-zone p.subtitle {
+  color: var(--color-brand-navy);
+  opacity: 0.75;
+  margin-bottom: 32px;
+}
+
+.btn-big {
+  font-family: var(--font-student);
+  font-size: 20px;
+  font-weight: 700;
+  color: white;
+  background: var(--color-brand-teal);
+  border: none;
+  border-radius: 999px;
+  padding: 18px 40px;
+  min-width: 220px;
+  margin: 10px;
+  box-shadow: 0 6px 0 rgba(0,0,0,0.1);
+  cursor: pointer;
+  transition: transform var(--motion-fast);
+}
+.btn-big:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0,0,0,0.1); }
+.btn-big.coral { background: var(--color-accent-coral); }
+.btn-big.gold  { background: var(--color-accent-gold); color: var(--color-brand-navy); }
+
+.card-student {
+  background: white;
+  border-radius: var(--radius-student-lg);
+  padding: 24px;
+  box-shadow: 0 8px 24px rgba(27,42,74,0.08);
+  max-width: 360px;
+  width: 100%;
+}
+
+.avatar-round {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid var(--color-accent-gold);
+  margin-bottom: 16px;
+}
+
+.logo-mark { width: 120px; margin-bottom: 16px; }
+
+/* شبكة اختيار PIN بصري (بدل كلمة مرور نصية) */
+.pin-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin: 20px 0;
+}
+.pin-option {
+  font-size: 32px;
+  background: var(--color-bg-student);
+  border: 3px solid transparent;
+  border-radius: 20px;
+  padding: 16px;
+  cursor: pointer;
+  transition: border-color var(--motion-fast);
+}
+.pin-option.selected { border-color: var(--color-brand-teal); }
+
+/* ============================================================
+   لوحة تحكم المدير — احترافية، بلا عناصر لعب
+   ============================================================ */
+.admin-zone {
+  background: var(--color-bg-admin);
+  font-family: var(--font-admin);
+  color: var(--color-slate);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.card-admin {
+  background: white;
+  border-radius: var(--radius-admin-sm);
+  padding: 32px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  max-width: 380px;
+  width: 100%;
+}
+
+.card-admin h1 {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 24px;
+  color: var(--color-brand-navy);
+}
+
+.input-admin {
+  width: 100%;
+  font-family: var(--font-admin);
+  font-size: 15px;
+  padding: 12px 14px;
+  border: 1px solid #D7DCE3;
+  border-radius: var(--radius-admin-sm);
+  margin-bottom: 14px;
+}
+
+.btn-admin {
+  width: 100%;
+  font-family: var(--font-admin);
+  font-size: 15px;
+  font-weight: 600;
+  color: white;
+  background: var(--color-brand-teal);
+  border: none;
+  border-radius: var(--radius-admin-sm);
+  padding: 12px;
+  cursor: pointer;
+}
+
+.error-msg {
+  color: var(--color-accent-coral);
+  font-size: 14px;
+  margin-top: 8px;
+  display: none;
+}
+
+.back-link {
+  display: inline-block;
+  margin-top: 20px;
+  color: var(--color-slate);
+  opacity: 0.6;
+  text-decoration: none;
+  font-size: 14px;
+}
