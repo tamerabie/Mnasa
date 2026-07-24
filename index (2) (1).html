@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ELH-PRIMARY1 — اختبار الاتصال</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: #FFF8ED;
+    color: #1B2A4A;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 24px;
+    text-align: center;
+  }
+  h1 { color: #17B6B0; }
+  #status {
+    font-size: 20px;
+    margin: 20px 0;
+    padding: 16px 24px;
+    border-radius: 16px;
+    background: white;
+  }
+  .ok { color: #4CAF6D; font-weight: bold; }
+  .err { color: #FF7A45; font-weight: bold; }
+  ul { list-style: none; padding: 0; }
+  li {
+    background: white;
+    margin: 8px 0;
+    padding: 12px 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  }
+</style>
+</head>
+<body>
+  <h1>🌍 عالم إل — اختبار الاتصال بقاعدة البيانات</h1>
+  <div id="status">جاري الاتصال...</div>
+  <ul id="units"></ul>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+    // ⬇️ استبدل القيمتين دول بالقيمتين من Supabase → Project Settings → API
+    const SUPABASE_URL = "ضع-الـ-Project-URL-هنا";
+    const SUPABASE_ANON_KEY = "ضع-الـ-anon-public-key-هنا";
+
+    const statusEl = document.getElementById('status');
+    const unitsEl = document.getElementById('units');
+
+    async function testConnection() {
+      try {
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const { data, error } = await supabase
+          .from('units')
+          .select('order_index, location_name')
+          .order('order_index');
+
+        if (error) throw error;
+
+        statusEl.innerHTML = `<span class="ok">الاتصال ناجح ✅</span>`;
+        unitsEl.innerHTML = data
+          .map(u => `<li>محطة ${u.order_index}: ${u.location_name}</li>`)
+          .join('');
+      } catch (err) {
+        statusEl.innerHTML = `<span class="err">فشل الاتصال ❌</span><br>${err.message}`;
+      }
+    }
+
+    testConnection();
+  </script>
+</body>
+</html>
