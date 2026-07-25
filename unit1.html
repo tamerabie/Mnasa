@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>بوابة إل — الوحدة 1</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  .dots { display:flex; gap:6px; margin-bottom: 20px; }
+  .dot { width:10px; height:10px; border-radius:50%; background:#E4DCC8; }
+  .dot.done { background: var(--color-brand-teal); }
+  .dot.current { background: var(--color-accent-gold); }
+  .mc-btn {
+    display:block; width:100%; font-family:var(--font-student); font-size:18px;
+    background:white; border:3px solid var(--color-bg-student); border-radius:20px;
+    padding:16px; margin:8px 0; cursor:pointer;
+  }
+  .mc-btn.correct { border-color: var(--color-meadow); background:#EAF7EE; }
+  .mic-btn {
+    width:100px; height:100px; border-radius:50%; border:none;
+    background: var(--color-accent-coral); color:white; font-size:38px;
+    box-shadow:0 6px 0 rgba(0,0,0,0.1); cursor:pointer;
+  }
+  .stars { font-size: 34px; margin: 12px 0; }
+  .joe-float { position: fixed; bottom: 20px; left: 20px; width: 54px; height:54px; border-radius:50%; box-shadow:0 4px 12px rgba(0,0,0,0.15); }
+</style>
+</head>
+<body class="student-zone">
+  <div class="dots" id="dots"></div>
+  <div class="card-student" id="stageCard" style="max-width:400px;">
+    جاري التحميل...
+  </div>
+  <img src="assets/joe-wave.png" class="joe-float" alt="Joe">
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+    const SUPABASE_URL = "ضع-الـ-Project-URL-هنا";
+    const SUPABASE_ANON_KEY = "ضع-الـ-anon-public-key-هنا";
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const studentId = localStorage.getItem('elh_student_id');
+    if (!studentId) location.href = 'student-login.html';
+
+    const STAGES = ['learning_goal','story','adventure','game','practice','song','phonics','challenge'];
+    let unitId = null;
+    let stageIndex = 0;
+    let phonicsLetterIndex = 0;
+    const phonicsLetters = ['T', 'I'];
+    let phonicsResults = [];
+
+    function renderDots() {
+      const dots = document.getElementById('dots');
+      dots.innerHTML = STAGES.map((s, i) =>
+        `<div class="dot ${i < stageIndex ? 'done' : i === stageIndex ? 'current' : ''}"></div>`
+      ).join('');
+    }
+
+    async function saveStage(stageName, scoreObj = {}) {
+      await supabase.from('unit_progress').upsert({
+        student_id: studentId,
+        unit_id: unitId,
+        stage: stageName,
+        status: 'completed',
+        completed_at: new Date().toISOString(),
+        score_internal: scoreObj
+      }, { onConflict: 'student_id,unit_id,stage' });
+
+      await supabase.from('rewards').insert({
+        student_id: studentId,
+        type: 'star',
+        reference_unit_id: unitId
+      });
+    }
+
+    function next() {
+      stageIndex++;
+      if (stageIndex >= STAGES.length) {
+        renderRecommendation();
+      } else {
+        renderStage();
+      }
+    }
+
+    function card(html) {
+      document.getElementById('stageCard').innerHTML = html;
+    }
+
+    function renderStage() {
+      renderDots();
+      const stage = STAGES[stageIndex];
+
+      if (stage === 'learning_goal') {
+        card(`
+          <h1>هنتعلم النهاردة 🌟</h1>
+          <p>👋 نقول "ازيك" بالإنجليزي</p>
+          <p>🔤 نسمع صوت حرف T و I</p>
+          <p>🚪 نفتح بوابة إل الأول!</p>
+          <button class="btn-big" style="width:100%" onclick="window.__next()">يلا نبدأ</button>
+        `);
+      }
+
+      else if (stage === 'story') {
+        card(`
+          <h1>🚪 بوابة إل</h1>
+          <p>عالم إل نايم من زمان...</p>
+          <p>Adam و Leo لقوا بوابة كبيرة قدامهم!</p>
+          <p>"يلا يا Adam، يمكن صوتنا يصحّي البوابة!" قال Leo.</p>
+          <button class="btn-big" style="width:100%" onclick="window.__next()">إيه اللي هيحصل؟</button>
+        `);
+      }
+
+      else if (stage === 'adventure') {
+        card(`
+          <h1>دوس على البوابة!</h1>
+          <p>خلي صوتك يوصل للبوابة السحرية 🌟</p>
+          <div id="gateArea" style="font-size:80px; cursor:pointer; margin:20px 0;" onclick="window.__openGate()">🚪</div>
+          <p id="gateMsg"></p>
+        `);
+      }
+
+      else if (stage === 'game') {
+        card(`
+          <h1>Hello! 👋</h1>
+          <p>حد قالك "Hello!" — هترد عليه بإيه؟</p>
+          <button class="mc-btn" onclick="window.__pickAnswer(true, this)">Hi! 👋</button>
+          <button class="mc-btn" onclick="window.__pickAnswer(false, this)">Bye 👋</button>
+          <div id="gameMsg" style="margin-top:10px;"></div>
+        `);
+      }
+
+      else if (stage === 'practice') {
+        card(`
+          <h1>قول معايا 🗣️</h1>
+          <p style="font-size:22px; font-weight:700; color:var(--color-brand-teal);">
+            "Hello, my name is Adam"
+          </p>
+          <p>جرب تقولها بصوت عالي!</p>
+          <button class="btn-big gold" style="width:100%" onclick="window.__next()">قريتها! ✅</button>
+        `);
+      }
+
+      else if (stage === 'song') {
+        card(`
+          <h1>🎵 غنوة بيلا</h1>
+          <p style="font-size:20px;">Hello, hello, how are you? 🎶</p>
+          <p style="font-size:20px;">I am fine, and you? 🎶</p>
+          <button class="btn-big coral" style="width:100%" onclick="window.__next()">خلصنا الغنوة 🎶</button>
+        `);
+      }
+
+      else if (stage === 'phonics') {
+        renderPhonics();
+      }
+
+      else if (stage === 'challenge') {
+        card(`
+          <h1>🏆 تحدي بوابة إل</h1>
+          <p>دوس على حرف T:</p>
+          <div style="display:flex; gap:10px; justify-content:center; margin:16px 0;">
+            <button class="mc-btn" style="width:70px;" onclick="window.__pickAnswer(true, this)">T</button>
+            <button class="mc-btn" style="width:70px;" onclick="window.__pickAnswer(false, this)">P</button>
+            <button class="mc-btn" style="width:70px;" onclick="window.__pickAnswer(false, this)">M</button>
+          </div>
+          <div id="gameMsg"></div>
+        `);
+      }
+    }
+
+    window.__openGate = function () {
+      document.getElementById('gateArea').textContent = '🌟🚪🌟';
+      document.getElementById('gateMsg').textContent = 'بوابة إل اتفتحت! 🎉';
+      setTimeout(() => window.__next(), 1200);
+    };
+
+    window.__pickAnswer = async function (isCorrect, btn) {
+      const msg = document.getElementById('gameMsg');
+      if (isCorrect) {
+        btn.classList.add('correct');
+        msg.textContent = 'برافو عليك! 🌟';
+        setTimeout(() => window.__next(), 900);
+      } else {
+        msg.textContent = 'قريب جدًا، جرب تاني! 😊';
+      }
+    };
+
+    // ============== Phonics (Web Speech API) ==============
+    function renderPhonics() {
+      const letter = phonicsLetters[phonicsLetterIndex];
+      card(`
+        <h1>معمل النطق 🎤</h1>
+        <p style="font-size:60px; font-weight:800; color:var(--color-brand-teal);">${letter}</p>
+        <p>دوس وقول صوت الحرف!</p>
+        <button class="mic-btn" onclick="window.__recordLetter('${letter}')">🎤</button>
+        <div class="stars" id="phonicsStars"></div>
+        <p id="phonicsMsg"></p>
+      `);
+    }
+
+    window.__recordLetter = async function (letter) {
+      const msgEl = document.getElementById('phonicsMsg');
+      const starsEl = document.getElementById('phonicsStars');
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+      if (!SpeechRecognition) {
+        // المتصفح مش بيدعم — نديله النجوم بالتشجيع افتراضيًا
+        await finishAttempt(letter, 2);
+        return;
+      }
+
+      const rec = new SpeechRecognition();
+      rec.lang = 'en-US';
+      msgEl.textContent = '🎙️ بسمعك...';
+
+      rec.onresult = async (e) => {
+        const heard = e.results[0][0].transcript;
+        const stars = heard && heard.trim().length > 0 ? 3 : 1;
+        await finishAttempt(letter, stars);
+      };
+      rec.onerror = async () => { await finishAttempt(letter, 2); };
+      rec.start();
+
+      async function finishAttempt(letter, stars) {
+        starsEl.textContent = '⭐'.repeat(stars);
+        msgEl.textContent = stars >= 2 ? 'شاطر جدًا! 🎉' : 'حاول تاني، هتبقى أحسن! 💪';
+
+        await supabase.from('phonics_attempts').insert({
+          student_id: studentId,
+          unit_id: unitId,
+          letter: letter,
+          accuracy_score: stars / 3,
+          attempt_number: 1
+        });
+        phonicsResults.push(stars);
+
+        setTimeout(async () => {
+          phonicsLetterIndex++;
+          if (phonicsLetterIndex < phonicsLetters.length) {
+            renderPhonics();
+          } else {
+            await window.__next();
+          }
+        }, 1200);
+      }
+    };
+
+    // ============== Recommendation (final screen) ==============
+    async function renderRecommendation() {
+      await saveStage('assessment', { phonics_avg: phonicsResults.length ? (phonicsResults.reduce((a,b)=>a+b,0)/phonicsResults.length) : null });
+
+      await supabase.from('rewards').insert({
+        student_id: studentId, type: 'badge', reference_unit_id: unitId
+      });
+
+      const avg = phonicsResults.length ? phonicsResults.reduce((a,b)=>a+b,0)/phonicsResults.length : 3;
+      const needsPractice = avg < 2;
+
+      card(`
+        <h1>🎉 برافووو!</h1>
+        <p>خلصت أول محطة في عالم إل!</p>
+        <div style="font-size:50px;">🏅⭐⭐⭐</div>
+        <p>${needsPractice
+          ? 'تحب نلعب تاني مع حرف T وI عشان تبقى بطل؟ 😊'
+          : 'أنت شاطر جدًا! جاهز للمحطة الجاية! 🚀'}</p>
+        <button class="btn-big gold" style="width:100%" onclick="location.href='world-map.html'">
+          رجوع للخريطة 🗺️
+        </button>
+      `);
+    }
+
+    // خلي كل الدوال متاحة كـ window.__next علشان onclick تلاقيها
+    window.__next = async function () {
+      const stage = STAGES[stageIndex];
+      if (stage) await saveStage(stage);
+      next();
+    };
+
+    // ============== تحميل بيانات الوحدة والبدء ==============
+    async function init() {
+      const { data: unit } = await supabase
+        .from('units').select('id').eq('order_index', 1).single();
+      unitId = unit.id;
+      renderStage();
+    }
+    init();
+  </script>
+</body>
+</html>
