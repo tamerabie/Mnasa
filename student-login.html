@@ -13,33 +13,104 @@
 
   <div class="card-student">
     <input
+      id="nameInput"
       type="text"
       placeholder="اكتب اسمك هنا"
       style="width:100%; font-family:var(--font-student); font-size:18px; padding:14px; border-radius:16px; border:2px solid var(--color-bg-student); background:var(--color-bg-student); text-align:center; margin-bottom:8px;"
     >
 
     <p style="margin: 16px 0 8px; font-weight:700;">اختار الرمز السري بتاعك:</p>
-    <div class="pin-grid">
-      <div class="pin-option">🦁</div>
-      <div class="pin-option">🌟</div>
-      <div class="pin-option">🚀</div>
-      <div class="pin-option">🐬</div>
-      <div class="pin-option">🎨</div>
-      <div class="pin-option">🍎</div>
+    <div class="pin-grid" id="pinGrid">
+      <div class="pin-option" data-pin="🦁">🦁</div>
+      <div class="pin-option" data-pin="🌟">🌟</div>
+      <div class="pin-option" data-pin="🚀">🚀</div>
+      <div class="pin-option" data-pin="🐬">🐬</div>
+      <div class="pin-option" data-pin="🎨">🎨</div>
+      <div class="pin-option" data-pin="🍎">🍎</div>
     </div>
 
-    <button class="btn-big gold" style="width:100%; margin-top:8px;">
+    <button class="btn-big gold" style="width:100%; margin-top:8px;" onclick="enterWorld()">
       يلا نلعب! 🎉
     </button>
+    <p id="msg" style="color:var(--color-accent-coral); font-weight:700; display:none; margin-top:10px;"></p>
   </div>
 
   <a href="index.html" class="back-link" style="color: var(--color-brand-navy); opacity:0.5;">رجوع</a>
 
-  <!--
-    ملاحظة تنفيذية (المرحلة 1 فقط):
-    هذه الشاشة بصرية بالكامل حسب Phase 1 من Roadmap — بدون منطق دخول فعلي بعد.
-    منطق الدخول الحقيقي (التحقق من الاسم والرمز، وإصدار جلسة الطالب)
-    سيُبنى في مرحلة لاحقة مع Edge Function المخصصة (AI/System Architecture).
-  -->
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+    const SUPABASE_URL = "ضع-الـ-Project-URL-هنا";
+    const SUPABASE_ANON_KEY = "ضع-الـ-anon-public-key-هنا";
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let selectedPin = null;
+    document.querySelectorAll('.pin-option').forEach(el => {
+      el.addEventListener('click', () => {
+        document.querySelectorAll('.pin-option').forEach(o => o.classList.remove('selected'));
+        el.classList.add('selected');
+        selectedPin = el.dataset.pin;
+      });
+    });
+
+    window.enterWorld = async function () {
+      const msg = document.getElementById('msg');
+      msg.style.display = 'none';
+
+      const nameRaw = document.getElementById('nameInput').value.trim();
+      if (!nameRaw) { showMsg('اكتب اسمك الأول 🙂'); return; }
+      if (!selectedPin) { showMsg('اختار رمزك السري 🌟'); return; }
+
+      const username = nameRaw.toLowerCase().replace(/\s+/g, '_');
+
+      // هل الطالب موجود بالفعل؟
+      const { data: existing } = await supabase
+        .from('students')
+        .select('id, pin_hash')
+        .eq('username', username)
+        .maybeSingle();
+
+      let studentId;
+
+      if (existing) {
+        if (existing.pin_hash !== selectedPin) {
+          showMsg('الرمز مش هو ده، جرب تاني 🤔');
+          return;
+        }
+        studentId = existing.id;
+      } else {
+        // أول أول محطة (بوابة إل) كنقطة بداية
+        const { data: firstUnit } = await supabase
+          .from('units')
+          .select('id')
+          .eq('order_index', 1)
+          .single();
+
+        const { data: created, error } = await supabase
+          .from('students')
+          .insert({
+            display_name: nameRaw,
+            username: username,
+            pin_hash: selectedPin,
+            current_unit_id: firstUnit.id,
+            status: 'active'
+          })
+          .select('id')
+          .single();
+
+        if (error) { showMsg('حصلت مشكلة، جرب تاني'); console.error(error); return; }
+        studentId = created.id;
+      }
+
+      localStorage.setItem('elh_student_id', studentId);
+      localStorage.setItem('elh_student_name', nameRaw);
+      location.href = 'world-map.html';
+
+      function showMsg(text) {
+        msg.textContent = text;
+        msg.style.display = 'block';
+      }
+    };
+  </script>
 </body>
 </html>
