@@ -6,38 +6,42 @@
 <title>خريطة عالم إل</title>
 <link rel="stylesheet" href="styles.css">
 <style>
-  .trail { display: flex; flex-direction: column; align-items: center; gap: 18px; margin-top: 20px; width: 100%; max-width: 380px; }
+  .map-track {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    max-width: 380px;
+    width: 100%;
+  }
   .station {
-    display: flex; align-items: center; gap: 14px;
-    background: white; border-radius: var(--radius-student-lg);
-    padding: 16px 20px; width: 100%;
+    width: 100%;
+    background: white;
+    border-radius: 24px;
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
     box-shadow: 0 6px 18px rgba(27,42,74,0.08);
-    text-decoration: none; color: var(--color-brand-navy);
+    text-decoration: none;
+    color: var(--color-brand-navy);
+    font-weight: 700;
+    font-size: 17px;
     transition: transform var(--motion-fast);
   }
-  .station.open { border: 3px solid var(--color-brand-teal); }
-  .station.locked { opacity: 0.5; }
-  .station:active.open { transform: scale(0.97); }
-  .station-icon { font-size: 34px; }
-  .station-text { text-align: right; flex: 1; }
-  .station-text .num { font-size: 13px; opacity: 0.6; }
-  .station-text .name { font-size: 18px; font-weight: 700; }
-  .joe-float {
-    position: fixed; bottom: 20px; left: 20px;
-    width: 60px; height: 60px; border-radius: 50%;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  }
+  .station.active { border: 3px solid var(--color-brand-teal); }
+  .station.locked { opacity: 0.45; }
+  .station:active.active { transform: scale(0.97); }
+  .station-emoji { font-size: 28px; }
+  .station-status { margin-inline-start: auto; font-size: 13px; opacity: 0.6; }
 </style>
 </head>
-<body class="student-zone" style="justify-content:flex-start; padding-top:40px;">
-  <h1 id="greeting">🌍 عالم إل</h1>
-  <p class="subtitle">اختار المحطة اللي عايز تروحها</p>
+<body class="student-zone">
+  <img src="assets/logo.png" alt="عالم إل" class="logo-mark" onerror="this.src='logo.png'">
+  <h1 id="greeting">أهلاً 🌍</h1>
+  <p class="subtitle">اختار المحطة اللي عايز تروحلها</p>
 
-  <div class="trail" id="trail">
-    <p>جاري التحميل...</p>
-  </div>
-
-  <img src="assets/joe-wave.png" class="joe-float" alt="Joe">
+  <div class="map-track" id="track">جاري التحميل...</div>
 
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
@@ -53,9 +57,10 @@
       location.href = 'student-login.html';
     }
 
-    document.getElementById('greeting').textContent = `🌍 أهلاً ${studentName || ''}`;
+    document.getElementById('greeting').textContent = `أهلاً يا ${studentName} 🌍`;
 
-    const icons = ['🚪','🎨','🏡','🪞','🌾','🌳'];
+    const emojiByOrder = { 1: '🚪', 2: '🎨', 3: '🌳', 4: '💧', 5: '🌾', 6: '🌲' };
+    const pageByOrder = { 1: 'unit1.html' };
 
     async function loadMap() {
       const { data: units } = await supabase
@@ -63,24 +68,21 @@
         .select('id, order_index, location_name')
         .order('order_index');
 
-      const trail = document.getElementById('trail');
-      trail.innerHTML = '';
+      const trackEl = document.getElementById('track');
+      trackEl.innerHTML = '';
 
-      units.forEach(u => {
-        const isUnit1 = u.order_index === 1;
-        const el = document.createElement(isUnit1 ? 'a' : 'div');
-        el.className = 'station ' + (isUnit1 ? 'open' : 'locked');
-        if (isUnit1) el.href = 'unit1.html';
+      for (const unit of units) {
+        const isBuilt = !!pageByOrder[unit.order_index];
+        const el = document.createElement(isBuilt ? 'a' : 'div');
+        el.className = `station ${isBuilt ? 'active' : 'locked'}`;
+        if (isBuilt) el.href = pageByOrder[unit.order_index];
         el.innerHTML = `
-          <div class="station-icon">${icons[u.order_index - 1] || '⭐'}</div>
-          <div class="station-text">
-            <div class="num">محطة ${u.order_index}</div>
-            <div class="name">${u.location_name}</div>
-          </div>
-          ${isUnit1 ? '' : '<div style="font-size:22px;">🔒</div>'}
+          <span class="station-emoji">${emojiByOrder[unit.order_index] || '⭐'}</span>
+          <span>محطة ${unit.order_index}: ${unit.location_name}</span>
+          <span class="station-status">${isBuilt ? '' : 'قريبًا'}</span>
         `;
-        trail.appendChild(el);
-      });
+        trackEl.appendChild(el);
+      }
     }
 
     loadMap();

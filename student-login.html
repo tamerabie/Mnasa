@@ -7,16 +7,16 @@
 <link rel="stylesheet" href="styles.css">
 </head>
 <body class="student-zone">
-  <img src="assets/joe-wave.png" alt="Joe" class="avatar-round">
+  <img src="assets/joe-wave.png" alt="Joe" class="avatar-round" onerror="this.src='joe-wave.png'">
   <h1>يلا بينا!</h1>
   <p class="subtitle">اختار اسمك وشكلك السري عشان تدخل 🎈</p>
 
   <div class="card-student">
     <input
-      id="nameInput"
+      id="studentName"
       type="text"
       placeholder="اكتب اسمك هنا"
-      style="width:100%; font-family:var(--font-student); font-size:18px; padding:14px; border-radius:16px; border:2px solid var(--color-bg-student); background:var(--color-bg-student); text-align:center; margin-bottom:8px;"
+      style="width:100%; font-family:var(--font-student); font-size:18px; padding:14px; border-radius:16px; border:2px solid var(--color-bg-student); background:var(--color-bg-student); text-align:center; margin-bottom:8px; box-sizing:border-box;"
     >
 
     <p style="margin: 16px 0 8px; font-weight:700;">اختار الرمز السري بتاعك:</p>
@@ -54,16 +54,18 @@
     });
 
     window.enterWorld = async function () {
-      const msg = document.getElementById('msg');
-      msg.style.display = 'none';
+      const nameInput = document.getElementById('studentName').value.trim();
+      const msgEl = document.getElementById('msg');
+      msgEl.style.display = 'none';
 
-      const nameRaw = document.getElementById('nameInput').value.trim();
-      if (!nameRaw) { showMsg('اكتب اسمك الأول 🙂'); return; }
-      if (!selectedPin) { showMsg('اختار رمزك السري 🌟'); return; }
+      if (!nameInput || !selectedPin) {
+        msgEl.textContent = 'اكتب اسمك واختار رمزك الأول 🙂';
+        msgEl.style.display = 'block';
+        return;
+      }
 
-      const username = nameRaw.toLowerCase().replace(/\s+/g, '_');
+      const username = nameInput.toLowerCase().replace(/\s+/g, '_');
 
-      // هل الطالب موجود بالفعل؟
       const { data: existing } = await supabase
         .from('students')
         .select('id, pin_hash')
@@ -74,12 +76,12 @@
 
       if (existing) {
         if (existing.pin_hash !== selectedPin) {
-          showMsg('الرمز مش هو ده، جرب تاني 🤔');
+          msgEl.textContent = 'الرمز السري مش هو نفسه اللي اخترته أول مرة 🤔';
+          msgEl.style.display = 'block';
           return;
         }
         studentId = existing.id;
       } else {
-        // أول أول محطة (بوابة إل) كنقطة بداية
         const { data: firstUnit } = await supabase
           .from('units')
           .select('id')
@@ -89,7 +91,7 @@
         const { data: created, error } = await supabase
           .from('students')
           .insert({
-            display_name: nameRaw,
+            display_name: nameInput,
             username: username,
             pin_hash: selectedPin,
             current_unit_id: firstUnit.id,
@@ -98,18 +100,18 @@
           .select('id')
           .single();
 
-        if (error) { showMsg('حصلت مشكلة، جرب تاني'); console.error(error); return; }
+        if (error) {
+          msgEl.textContent = 'حصلت مشكلة، جربي تاني 🙏';
+          msgEl.style.display = 'block';
+          console.error(error);
+          return;
+        }
         studentId = created.id;
       }
 
       localStorage.setItem('elh_student_id', studentId);
-      localStorage.setItem('elh_student_name', nameRaw);
+      localStorage.setItem('elh_student_name', nameInput);
       location.href = 'world-map.html';
-
-      function showMsg(text) {
-        msg.textContent = text;
-        msg.style.display = 'block';
-      }
     };
   </script>
 </body>
